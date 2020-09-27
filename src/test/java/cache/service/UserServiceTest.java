@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Slf4j
@@ -78,5 +76,47 @@ class UserServiceTest {
         User user4 = service.createOrReturnCached(new User("Lany", "petya@mail.ru"));
         log.info("created user4: {}", user4);
 
+    }
+
+    @Test
+    void deleteAndEvict() {
+
+        User user1 = service.create(new User("Petr", "petr@mail.ru"));
+        log.info("{}", service.get(user1.getId()));
+
+        User user2 = service.create(new User("Petr", "petr@mail.ru"));
+        log.info("{}", service.get(user2.getId()));
+
+        System.out.println();
+        System.out.println("Удаление пользователя 'User1' из метода 'delete()', который не работает с кэшем:");
+
+        service.delete(user1.getId());
+
+        log.info("{}", service.get(user1.getId()));
+
+        service.deleteAndEvict(user2.getId());
+
+        System.out.println();
+        System.out.println("Пробуем получить данные об обоих пользователях:");
+
+        log.info("{}", service.get(user1.getId()));
+        log.info("{}", service.get(user2.getId()));
+
+    }
+
+
+    @Test
+    public void checkSettings() throws InterruptedException {
+
+        User user1 = service.createOrReturnCached(new User("ann", "ann@mail.ru"));
+        log.info("{}", service.get(user1.getId()));
+
+        User user2 = service.createOrReturnCached(new User("ann", "ann@mail.ru"));
+        log.info("{}", service.get(user2.getId()));
+
+        Thread.sleep(1000L);
+
+        User user3 = service.createOrReturnCached(new User("ann", "ann@mail.ru"));
+        log.info("{}", service.get(user3.getId()));
     }
 }

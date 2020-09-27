@@ -5,11 +5,13 @@ import cache.repository.UserRepository;
 import cache.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Slf4j
@@ -23,6 +25,7 @@ public class UserServiceImpl implements UserService {
         this.repository = repository;
     }
 
+    @Transactional
     @Override
     public User create(User user) {
         return repository.save(user);
@@ -73,6 +76,7 @@ public class UserServiceImpl implements UserService {
         return repository.save(user);
     }
 
+    @Transactional
     @Override
     public void delete(Long id) {
 
@@ -82,7 +86,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict("users")
     public void deleteAndEvict(Long id) {
 
+        log.info("deleting user by id: {}", id);
+        repository.deleteById(id);
     }
 }
